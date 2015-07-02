@@ -24,6 +24,7 @@ ENTRY_PT = BENCH_AppMain
 OBJS = bench_app_main.o
 OBJS += dhry_1.o
 OBJS += dhry_2.o
+OBJS += whet.o
 
 #
 # Source files required to build subsystem; used to generate dependencies.

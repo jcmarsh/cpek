@@ -11,6 +11,7 @@
 */
 
 #include "dhry.h"
+#include "whet.h"
 #include "bench_app.h"
 #include "bench_app_perfids.h"
 #include "bench_app_msgids.h"
@@ -57,7 +58,17 @@ void BENCH_AppMain(void) {
 
   current = xTaskGetTickCount();
 
-  printf("Ticks elapsed: %d\n", current - last);
+  printf("Ticks elapsed Dhrystone: %d\n", current - last);
+
+  // Run Whetstone test
+  last = xTaskGetTickCount();
+
+  runWhetstone(10);
+
+  current = xTaskGetTickCount();
+
+  printf("Ticks elapsed Whetstone: %d\n", current - last);
+
 
 
   /*
