@@ -8,6 +8,7 @@ then
 fi
 
 # copy Makefile, platform and mission
+# TODO: also copy startuptable.c and makefile
 cp ../../apps/$1/fsw/for_build/* ./$1/
 cp ../../apps/$1/fsw/platform_inc/* ./inc/
 cp ../../apps/$1/fsw/mission_inc/* ../mission_inc/
