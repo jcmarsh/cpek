@@ -13,23 +13,42 @@ Right now only a few custom benchmarks:
 
 ## Utilities
 * `./new_app/` - A script (`new_application.py`) that creates a slew of files based off of template files and using the names provided in `var.table`. Based off of the cFE sample_app.
-* `update_app.sh - Script to copy files into the build directory for an application. Should really be part of Make system if I could figure it out.
+* `update_app.sh - Script to copy files into the build directory for an application (for CFS). Should really be part of Make system if I could figure it out.
 
 ## Installation
-cFE - 
-FreeRTOS - 
+
+cFE - To run a benchmark in cFE:
+* Copy apps from `cpek/cFE/<benchmark>/apps/` into app folder of a fresh cFE install.
+* Update the apps:
+** For each app, run `sh update_app.sh <app_name> from the platform build directory (`build/<platform>/`)
+* Copy corresponding Makefile from `cpek/cFE/<benchmarks>/` into `build/<platform>/`
+* Copy `cpek/cFE/<benchmark>/startuptable.c` to `build/<platform>/startuptab/` (nanomind platform only).
+* Copy `cpek/cFE/<benchmark>/cfe_es_startup.scr` to build/<platform>/exe/`
+* From top level of cFE source, run `. ./setvars.sh`
+* From `/build/<platform>/` run `make`
+* From `/build/<platform>/nanomind` run `make program` (nanomind only)
+
+FreeRTOS - To run a benchmark in FreeRTOS:
+* Copy files from `cpek/FreeRTOS/<benchmark>/include` and `cpek/FreeRTOS/<benchmark>/src` into the corresponding folders of a fresh FreeRTOS source (from GomSpace) directory.
+* From top level for FreeRTOS source:
+** ./configure-a712-nostorage.sh 
+** ./waf build
+** ./waf program
+
 Dhrystone - Original is from: http://zenit.senecac.on.ca/wiki/index.php/Dhrystone_howto
+
 Modified to run on the NanoMind in a cFE app / FreeRTOS task.
-  wget http://www.sfr-fresh.com/unix/privat/old/dhrystone-2.1.tar.gz
-  tar xf dhrystone-2.1.tar.gz
+  `wget http://www.sfr-fresh.com/unix/privat/old/dhrystone-2.1.tar.gz`
+  `tar xf dhrystone-2.1.tar.gz`
+
 Update the Makefile, make, and run (enter at least 100000000)
+
 Divide result by 1757 to convert to DMIPS.
+
 Copy files into fresh cFE / FreeRTOS directory:
-  /cfe_bench/apps$ cp -r ../../cpek/cFE/benchmarks/apps/bench ./
+  `/cfe_bench/apps$ cp -r ../../cpek/cFE/benchmarks/apps/bench ./`
+
 Copy files into build directory:
-  /cfe_bench/build/dellingr-nanomind$ sh update_app.sh bench
+  `/cfe_bench/build/dellingr-nanomind$ sh update_app.sh bench`
+
 Then make. Should recopy (both steps) and edit files from the cpek directory to track changes.
-
-
-  
-
