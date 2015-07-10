@@ -84,6 +84,7 @@ void runDhrystone(int n)
         /* Warning: With 16-Bit processors and Number_Of_Runs > 32000,  */
         /* overflow may occur for this array element.                   */
 
+  /*
   printf ("\n");
   printf ("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
   printf ("\n");
@@ -96,9 +97,9 @@ void runDhrystone(int n)
   {
     printf ("Program compiled without 'register' attribute\n");
     printf ("\n");
-  }
+  } */
   Number_Of_Runs = n;
-  printf ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
+  // printf ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
 
   for (Run_Index = 1; Run_Index <= Number_Of_Runs; ++Run_Index)
   {
@@ -146,6 +147,7 @@ void runDhrystone(int n)
 
   } /* loop "for Run_Index" */
 
+  /*
   printf ("Execution ends\n");
   printf ("\n");
   printf ("Final values of the variables used in the benchmark:\n");
@@ -198,6 +200,7 @@ void runDhrystone(int n)
   printf ("Str_2_Loc:           %s\n", Str_2_Loc);
   printf ("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
   printf ("\n");  
+  */
 }
 
 
