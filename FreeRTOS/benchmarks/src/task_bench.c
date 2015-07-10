@@ -43,18 +43,9 @@ void vTaskBench(void * param) {
   total_ticks = current - last;
   printf("Ticks elapsed Whetstone: %d\n", total_ticks);
 
-  /*
-C----------------------------------------------------------------
-C      Performance in Whetstone KIP's per second is given by
-C
-C(100*LOOP*II)/TIME
-C
-C      where TIME is in seconds.
-C--------------------------------------------------------------------
-  */
   whet_seconds = (total_ticks * portTICK_RATE_MS) / 1000.0;
   whet_KIPs = (100 * number_of_runs_whet * 1) / whet_seconds;
-  // printf("C Converted Double Precision Whetstones: %.1f KIPS\n", KIPS);
+
   printf("Whetstones: %.1f KIPS\n", whet_KIPs);
 
   while (1) {
