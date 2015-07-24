@@ -41,47 +41,50 @@ static CFE_EVS_BinFilter_t  BENCH_EventFilters[] = {  /* Event ID    mask */
 void BENCH_AppMain(void) {
   int retval;
   TickType_t last, current, total_ticks;
-  int runs_dhry = 100000;
-  int runs_whet = 250;
-  float Dhry_Microseconds, Dhry_Per_Second;
-  float Whet_Seconds, Whet_KIPs;
+  int number_of_runs_dhry = 100000;
+  int number_of_runs_whet = 250;
+  float Microseconds, Dhrystones_Per_Second;
+  float whet_seconds, whet_KIPs;
 
   uint32 RunStatus = CFE_ES_APP_RUN;
 
-  CFE_ES_PerfLogEntry(BENCH_APP_PERF_ID);
+  //CFE_ES_PerfLogEntry(BENCH_APP_PERF_ID);
 
   printf("BENCH: Tick rate MS: %d\t Config tick rate HZ: %d\n", portTICK_RATE_MS, configTICK_RATE_HZ);
+
+  vTaskDelay(10000);
 
   BENCH_AppInit();
 
   // Run Dhrystone test
   last = xTaskGetTickCount();
 
-  runDhrystone(runs_dhry);
+  runDhrystone(number_of_runs_dhry);
 
   current = xTaskGetTickCount();
 
-  total_ticks = current - last;
+  total_ticks = current - last;  
   printf("Ticks elapsed Dhrystone: %d\n", total_ticks);
 
-  Dhry_Microseconds = (total_ticks * portTICK_RATE_MS * 1000) / (float) runs_dhry;
-  Dhry_Per_Second = runs_dhry / ((total_ticks * portTICK_RATE_MS) / 1000.0);
-  printf("Microseconds per Dhrystone: %6.1f \n", Dhry_Microseconds);
-  printf("Dhrystones per second: %6.1f \n", Dhry_Per_Second);
+  Microseconds = (total_ticks * portTICK_RATE_MS * 1000) / (float) number_of_runs_dhry;
+  Dhrystones_Per_Second = number_of_runs_dhry / ((total_ticks * portTICK_RATE_MS) / 1000.0);
+  printf("Microseconds per Dhrystone: %6.1f \n", Microseconds);
+  printf("Dhrystones per second: %6.1f \n", Dhrystones_Per_Second);
 
   // Run Whetstone test
   last = xTaskGetTickCount();
 
-  runWhetstone(runs_whet);
+  runWhetstone(number_of_runs_whet);
 
   current = xTaskGetTickCount();
 
   total_ticks = current - last;
   printf("Ticks elapsed Whetstone: %d\n", total_ticks);
 
-  Whet_Seconds = (total_ticks * portTICK_RATE_MS) / 1000.0;
-  Whet_KIPs = (100 * runs_whet * 1) / Whet_Seconds;
-  printf("Whetstones: %.1f KIPS\n", Whet_KIPs);
+  whet_seconds = (total_ticks * portTICK_RATE_MS) / 1000.0;
+  whet_KIPs = (100 * number_of_runs_whet * 1) / whet_seconds;
+
+  printf("Whetstones: %.1f KIPS\n", whet_KIPs);
 
 
   /*

@@ -56,11 +56,11 @@ int main(void) {
 
   /* Initialize delay */
   delay_init(cpu_core_clk);
-  
+
 #if ENABLE_RTC
   struct ds1302_clock clock;
   timestamp_t timestamp;
-  
+
   /* Get time from RTC */
   ds1302_init();
   ds1302_clock_read_burst(&clock);
@@ -135,7 +135,7 @@ int main(void) {
   /* Start supervisor */
   sv_init(1000);
 #endif
-  
+
 #if ENABLE_CPP
   /* C++ static constructors */
   extern void (*__init_array_start []) (void) __attribute__((weak));
@@ -149,9 +149,18 @@ int main(void) {
   xTaskCreate(debug_console, (const signed char *) "CONSOLE", 1024*4, NULL, 0, NULL);
   
   extern void vTaskInit(void *pvParameters);
-  xTaskCreate(vTaskInit, (const signed char *) "INIT", 1024*4, NULL, 3, NULL);
+  //xTaskCreate(vTaskInit, (const signed char *) "INIT", 1024*4, NULL, 2, NULL);
   extern void vTaskServer(void * pvParameters);
+
+#if (FREERTOS_VERSION >= 8)
+  xTaskCreate(debug_console, (const char *) "CONSOLE", 1024*4, NULL, 0, NULL);
+  xTaskCreate(vTaskInit, (const char *) "INIT", 1024*4, NULL, 3, NULL);
+  xTaskCreate(vTaskServer, (const char *) "SRV", 1024*4, NULL, 2, NULL);
+#else
+  xTaskCreate(debug_console, (const signed char *) "CONSOLE", 1024*4, NULL, 0, NULL);
+  xTaskCreate(vTaskInit, (const signed char *) "INIT", 1024*4, NULL, 3, NULL);
   xTaskCreate(vTaskServer, (const signed char *) "SRV", 1024*4, NULL, 2, NULL);
+#endif
 
   // rw_ping to test harware communication time.
   extern void vTaskRWPG(void * pvParameters);

@@ -25,8 +25,14 @@
 
 pong_hk_tlm_t    PONG_HkTelemetryPkt;
 PING_NoArgsCmd_t PING_cmd;
-CFE_SB_PipeId_t    PONG_CommandPipe;
-CFE_SB_MsgPtr_t    PONG_MsgPtr;
+CFE_SB_PipeId_t  PONG_CommandPipe;
+CFE_SB_MsgPtr_t  PONG_MsgPtr;
+PP_32_Msg_t      PONG_32_MsgPkt;
+PP_64_Msg_t      PONG_64_MsgPkt;
+PP_128_Msg_t     PONG_128_MsgPkt;
+PP_256_Msg_t     PONG_256_MsgPkt;
+PP_512_Msg_t     PONG_512_MsgPkt;
+PP_1024_Msg_t    PONG_1024_MsgPkt;
 
 static CFE_EVS_BinFilter_t  PONG_EventFilters[] =
        {  /* Event ID    mask */
@@ -35,6 +41,15 @@ static CFE_EVS_BinFilter_t  PONG_EventFilters[] =
           {PONG_COMMANDNOP_INF_EID,    0x0000},
           {PONG_COMMANDRST_INF_EID,    0x0000},
        };
+
+// cast any packet to 32_Msg_t
+void initPacket(int n, PP_32_Msg_t * pkt) {
+  int i;
+ 
+  for (i = 0; i < n; i++) {
+    pkt->data[i] = 2;
+  }
+}
 
 void PONG_AppMain( void ) {
   int32  status;
@@ -47,10 +62,24 @@ void PONG_AppMain( void ) {
   CFE_SB_InitMsg(&PING_cmd, PONG_TO_PING_MID, sizeof(PING_NoArgsCmd_t), TRUE);
   CFE_SB_SetCmdCode((CFE_SB_MsgPtr_t) &PING_cmd, PING_PING_CC);
 
+  CFE_SB_InitMsg(&PONG_32_MsgPkt,   PONG_TO_PING_32_MID,   sizeof(PP_32_Msg_t),   TRUE);
+  CFE_SB_InitMsg(&PONG_64_MsgPkt,   PONG_TO_PING_64_MID,   sizeof(PP_64_Msg_t),   TRUE);
+  CFE_SB_InitMsg(&PONG_128_MsgPkt,  PONG_TO_PING_128_MID,  sizeof(PP_128_Msg_t),  TRUE);
+  CFE_SB_InitMsg(&PONG_256_MsgPkt,  PONG_TO_PING_256_MID,  sizeof(PP_256_Msg_t),  TRUE);
+  CFE_SB_InitMsg(&PONG_512_MsgPkt,  PONG_TO_PING_512_MID,  sizeof(PP_512_Msg_t),  TRUE);
+  CFE_SB_InitMsg(&PONG_1024_MsgPkt, PONG_TO_PING_1024_MID, sizeof(PP_1024_Msg_t), TRUE);
+
+  initPacket(32,   (PP_32_Msg_t *) &PONG_32_MsgPkt);
+  initPacket(64,   (PP_32_Msg_t *) &PONG_64_MsgPkt);
+  initPacket(128,  (PP_32_Msg_t *) &PONG_128_MsgPkt);
+  initPacket(256,  (PP_32_Msg_t *) &PONG_256_MsgPkt);
+  initPacket(512,  (PP_32_Msg_t *) &PONG_512_MsgPkt);
+  initPacket(1024, (PP_32_Msg_t *) &PONG_1024_MsgPkt);
+
   /*
   ** PONG Runloop
   */
-  while (CFE_ES_RunLoop(&RunStatus) == TRUE) {
+  while (1) { //while (CFE_ES_RunLoop(&RunStatus) == TRUE) {
     // CFE_ES_PerfLogExit(PONG_APP_PERF_ID);
 
     /* Pend on receipt of command packet -- timeout set to 500 millisecs */
@@ -91,6 +120,13 @@ void PONG_AppInit(void) {
   CFE_SB_Subscribe(PONG_APP_CMD_MID, PONG_CommandPipe);
   CFE_SB_Subscribe(PONG_APP_SEND_HK_MID, PONG_CommandPipe);
   CFE_SB_Subscribe(PING_TO_PONG_MID, PONG_CommandPipe);
+
+  CFE_SB_Subscribe(PING_TO_PONG_32_MID,   PONG_CommandPipe);
+  CFE_SB_Subscribe(PING_TO_PONG_64_MID,   PONG_CommandPipe);
+  CFE_SB_Subscribe(PING_TO_PONG_128_MID,  PONG_CommandPipe);
+  CFE_SB_Subscribe(PING_TO_PONG_256_MID,  PONG_CommandPipe);
+  CFE_SB_Subscribe(PING_TO_PONG_512_MID,  PONG_CommandPipe);
+  CFE_SB_Subscribe(PING_TO_PONG_1024_MID, PONG_CommandPipe);
   
   PONG_ResetCounters();
 
@@ -122,6 +158,27 @@ void PONG_ProcessCommandPacket(void) {
   case PING_TO_PONG_MID:
     // Send a cmd to pong
     CFE_SB_SendMsg((CFE_SB_MsgPtr_t) ((int)&PING_cmd));
+    break;
+  case PING_TO_PONG_32_MID:
+    //;
+    //PP_32_Msg_t *temp = (PP_32_Msg_t *)CFE_SB_GetUserData(PONG_MsgPtr);
+    //printf("PONG: Message data: %d should = 5\n", temp->data[0]);
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &PONG_32_MsgPkt);
+    break;
+  case PING_TO_PONG_64_MID:
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &PONG_64_MsgPkt);
+    break;
+  case PING_TO_PONG_128_MID:
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &PONG_128_MsgPkt);
+    break;
+  case PING_TO_PONG_256_MID:
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &PONG_256_MsgPkt);
+    break;
+  case PING_TO_PONG_512_MID:
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &PONG_512_MsgPkt);
+    break;
+  case PING_TO_PONG_1024_MID:
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &PONG_1024_MsgPkt);
     break;
   default:
     PONG_HkTelemetryPkt.pong_command_error_count++;

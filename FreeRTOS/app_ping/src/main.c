@@ -48,7 +48,13 @@
 #define F_OSC				8000000
 #define F_USART				500000
 
-xQueueHandle ping_to_pong_Q, pong_to_ping_Q;
+xQueueHandle ping_to_pong_Q,      pong_to_ping_Q;
+xQueueHandle ping_to_pong_32_Q,   pong_to_ping_32_Q;
+xQueueHandle ping_to_pong_64_Q,   pong_to_ping_64_Q;
+xQueueHandle ping_to_pong_128_Q,  pong_to_ping_128_Q;
+xQueueHandle ping_to_pong_256_Q,  pong_to_ping_256_Q;
+xQueueHandle ping_to_pong_512_Q,  pong_to_ping_512_Q;
+xQueueHandle ping_to_pong_1024_Q, pong_to_ping_1024_Q;
 
 int main(void) {
   /* Initialise USART */
@@ -56,11 +62,11 @@ int main(void) {
 
   /* Initialize delay */
   delay_init(cpu_core_clk);
-  
+
 #if ENABLE_RTC
   struct ds1302_clock clock;
   timestamp_t timestamp;
-  
+
   /* Get time from RTC */
   ds1302_init();
   ds1302_clock_read_burst(&clock);
@@ -135,7 +141,7 @@ int main(void) {
   /* Start supervisor */
   sv_init(1000);
 #endif
-  
+
 #if ENABLE_CPP
   /* C++ static constructors */
   extern void (*__init_array_start []) (void) __attribute__((weak));
@@ -149,24 +155,85 @@ int main(void) {
   xTaskCreate(debug_console, (const signed char *) "CONSOLE", 1024*4, NULL, 0, NULL);
   
   extern void vTaskInit(void *pvParameters);
-  xTaskCreate(vTaskInit, (const signed char *) "INIT", 1024*4, NULL, 3, NULL);
+  //xTaskCreate(vTaskInit, (const signed char *) "INIT", 1024*4, NULL, 2, NULL);
   extern void vTaskServer(void * pvParameters);
+
+#if (FREERTOS_VERSION >= 8)
+  xTaskCreate(debug_console, (const char *) "CONSOLE", 1024*4, NULL, 0, NULL);
+  xTaskCreate(vTaskInit, (const char *) "INIT", 1024*4, NULL, 3, NULL);
+  xTaskCreate(vTaskServer, (const char *) "SRV", 1024*4, NULL, 2, NULL);
+#else
+  xTaskCreate(debug_console, (const signed char *) "CONSOLE", 1024*4, NULL, 0, NULL);
+  xTaskCreate(vTaskInit, (const signed char *) "INIT", 1024*4, NULL, 3, NULL);
   xTaskCreate(vTaskServer, (const signed char *) "SRV", 1024*4, NULL, 2, NULL);
+#endif
 
   //xTaskCreate(vTaskUsartRx, (const signed char*) "USART", 1024*4, NULL, 3, NULL);
 
-  printf("What is the deal?");
-  
-  ping_to_pong_Q = xQueueCreate(10, sizeof(unsigned long));
-  pong_to_ping_Q = xQueueCreate(10, sizeof(unsigned long));
+  printf("What is the deal? %d\n", sizeof(unsigned long));
 
   // ping, then pong
   extern void vTaskPing(void * pvParameters);
-  xTaskCreate(vTaskPing, (const signed char *) "PING", 1024 * 4,
+  xTaskCreate(vTaskPing,     (const signed char *) "PING",     1024 * 4,
 	      NULL, 3, NULL);
+  /*
+  // long test (4 bytes)
+  ping_to_pong_Q = xQueueCreate(10, sizeof(unsigned long));
+  pong_to_ping_Q = xQueueCreate(10, sizeof(unsigned long));
+
   extern void vTaskPong(void * pvParameters);
-  xTaskCreate(vTaskPong, (const signed char *) "PING", 1024 * 4,
+  xTaskCreate(vTaskPong,     (const signed char *) "PONG",     1024 * 4,
 	      NULL, 3, NULL);
+  
+  // 32 byte test
+  ping_to_pong_32_Q   = xQueueCreate(10, sizeof(char) * 32);
+  pong_to_ping_32_Q   = xQueueCreate(10, sizeof(char) * 32);
+
+  extern void vTaskPong32(void * pvParameters);
+  xTaskCreate(vTaskPong32,   (const signed char *) "PONG32",   1024 * 4,
+        NULL, 3, NULL);
+  
+  // 64 byte test
+  ping_to_pong_64_Q   = xQueueCreate(10, sizeof(char) * 64);
+  pong_to_ping_64_Q   = xQueueCreate(10, sizeof(char) * 64);
+
+  extern void vTaskPong64(void * pvParameters);
+  xTaskCreate(vTaskPong64,   (const signed char *) "PONG64",   1024 * 4,
+        NULL, 3, NULL);
+
+  // 128 byte test
+  ping_to_pong_128_Q  = xQueueCreate(10, sizeof(char) * 128);
+  pong_to_ping_128_Q  = xQueueCreate(10, sizeof(char) * 128);
+
+  extern void vTaskPong128(void * pvParameters);
+  xTaskCreate(vTaskPong128,  (const signed char *) "PONG128",  1024 * 4,
+        NULL, 3, NULL);
+
+  // 256 byte test
+  ping_to_pong_256_Q  = xQueueCreate(10, sizeof(char) * 256);
+  pong_to_ping_256_Q  = xQueueCreate(10, sizeof(char) * 256);
+
+  extern void vTaskPong256(void * pvParameters);
+  xTaskCreate(vTaskPong256,  (const signed char *) "PONG256",  1024 * 4,
+        NULL, 3, NULL);
+
+  // 512 byte test
+  ping_to_pong_512_Q  = xQueueCreate(10, sizeof(char) * 512);
+  pong_to_ping_512_Q  = xQueueCreate(10, sizeof(char) * 512);
+
+  extern void vTaskPong512(void * pvParameters);
+  xTaskCreate(vTaskPong512,  (const signed char *) "PONG512",  1024 * 4,
+        NULL, 3, NULL);
+  */
+  // 1024 byte test
+  ping_to_pong_1024_Q = xQueueCreate(10, sizeof(char) * 1024);
+  pong_to_ping_1024_Q = xQueueCreate(10, sizeof(char) * 1024);
+  
+  extern void vTaskPong1024(void * pvParameters);
+  xTaskCreate(vTaskPong1024, (const signed char *) "PONG1024", 1024 * 4,
+        NULL, 3, NULL);
+  /*
+  */
 
   /* Timer uses LFCLOCK = F_OSC/2 */
   vTaskStartScheduler(F_OSC/2, 1024*4);

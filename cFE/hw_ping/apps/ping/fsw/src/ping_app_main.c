@@ -71,7 +71,7 @@ void PING_AppMain( void ) {
   /*
   ** PING Runloop
   */
-  while (CFE_ES_RunLoop(&RunStatus) == TRUE) {
+  while (1) { //while (CFE_ES_RunLoop(&RunStatus) == TRUE) {
     if (timer_running) {
       retval = rwlib_receiveParamTelem(0x34, &param_type, &param_value);
       //printf("Data back: %d, %f\n", param_type, param_value);

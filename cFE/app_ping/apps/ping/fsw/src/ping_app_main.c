@@ -29,8 +29,15 @@
 
 ping_hk_tlm_t    PING_HkTelemetryPkt;
 PONG_NoArgsCmd_t PONG_cmd;
-CFE_SB_PipeId_t    PING_CommandPipe;
-CFE_SB_MsgPtr_t    PING_MsgPtr;
+CFE_SB_PipeId_t  PING_CommandPipe;
+CFE_SB_MsgPtr_t  PING_MsgPtr;
+PP_32_Msg_t      PING_32_MsgPkt;
+PP_64_Msg_t      PING_64_MsgPkt;
+PP_128_Msg_t     PING_128_MsgPkt;
+PP_256_Msg_t     PING_256_MsgPkt;
+PP_512_Msg_t     PING_512_MsgPkt;
+PP_1024_Msg_t    PING_1024_MsgPkt;
+
 
 static CFE_EVS_BinFilter_t  PING_EventFilters[] = {  /* Event ID    mask */
   {PING_STARTUP_INF_EID,       0x0000},
@@ -40,48 +47,105 @@ static CFE_EVS_BinFilter_t  PING_EventFilters[] = {  /* Event ID    mask */
 };
 
 unsigned long count = 0;
-int timer_running = 0;
+volatile int timer_running = 0;
 
 void vTimerCallbackPing(xTimerHandle time) {
   timer_running = 0;
+}
+
+// cast any packet to 32_Msg_t
+void initPacketPing(int n, PP_32_Msg_t * pkt) {
+  int i;
+ 
+  for (i = 0; i < n; i++) {
+    pkt->data[i] = 5;
+  }
 }
 
 void PING_AppMain( void ) {
   int32  status;
   uint32 RunStatus = CFE_ES_APP_RUN;
   xTimerHandle timer_id;
+  int packet_mode = 0;
+  int run_count = 0;
 
-  //CFE_ES_PerfLogEntry(PING_APP_PERF_ID);
+  printf("PING: Size of tlm header: %d\tcmd header: %d\n", CFE_SB_TLM_HDR_SIZE, CFE_SB_CMD_HDR_SIZE);
+  printf("PING: Size long: %d\n", sizeof(long));  
 
   PING_AppInit();
   CFE_SB_InitMsg(&PONG_cmd, PING_TO_PONG_MID, sizeof(PONG_NoArgsCmd_t), TRUE);
   CFE_SB_SetCmdCode((CFE_SB_MsgPtr_t)  &PONG_cmd, PONG_PING_CC);
+
+
+  CFE_SB_InitMsg(&PING_32_MsgPkt,   PING_TO_PONG_32_MID,   sizeof(PP_32_Msg_t),   TRUE);
+  CFE_SB_InitMsg(&PING_64_MsgPkt,   PING_TO_PONG_64_MID,   sizeof(PP_64_Msg_t),   TRUE);
+  CFE_SB_InitMsg(&PING_128_MsgPkt,  PING_TO_PONG_128_MID,  sizeof(PP_128_Msg_t),  TRUE);
+  CFE_SB_InitMsg(&PING_256_MsgPkt,  PING_TO_PONG_256_MID,  sizeof(PP_256_Msg_t),  TRUE);
+  CFE_SB_InitMsg(&PING_512_MsgPkt,  PING_TO_PONG_512_MID,  sizeof(PP_512_Msg_t),  TRUE);
+  CFE_SB_InitMsg(&PING_1024_MsgPkt, PING_TO_PONG_1024_MID, sizeof(PP_1024_Msg_t), TRUE);
+
+  initPacketPing(32,   (PP_32_Msg_t *) &PING_32_MsgPkt);
+  initPacketPing(64,   (PP_32_Msg_t *) &PING_64_MsgPkt);
+  initPacketPing(128,  (PP_32_Msg_t *) &PING_128_MsgPkt);
+  initPacketPing(256,  (PP_32_Msg_t *) &PING_256_MsgPkt);
+  initPacketPing(512,  (PP_32_Msg_t *) &PING_512_MsgPkt);
+  initPacketPing(1024, (PP_32_Msg_t *) &PING_1024_MsgPkt);
 
   timer_id = xTimerCreate((const signed char *) "Ping Timer", 1000,
 			  pdFALSE, &timer_id, vTimerCallbackPing);
   xTimerStart(timer_id, 0);
   timer_running = 1;
 
-  printf("PING set timer, ready to rock.\n");
+  //printf("PING set timer, ready to rock.\n");
   /*
   ** PING Runloop
   */
-  while (CFE_ES_RunLoop(&RunStatus) == TRUE) {
-    //CFE_ES_PerfLogExit(PING_APP_PERF_ID);
-    if (timer_running) {
-      // Send a cmd to pong
-      CFE_SB_SendMsg((CFE_SB_MsgPtr_t) ((int)&PONG_cmd));
+  while (1) { //while (CFE_ES_RunLoop(&RunStatus) == TRUE) {
+    if (timer_running && packet_mode < 7) {
+
+      switch (packet_mode) {
+      case (0):
+        // Send a cmd to pong
+        CFE_SB_SendMsg((CFE_SB_MsgPtr_t) ((int)&PONG_cmd));
+        break;
+      case (1):
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &PING_32_MsgPkt);
+        break;
+      case (2):
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &PING_64_MsgPkt);
+        break;
+      case (3):
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &PING_128_MsgPkt);	
+        break;
+      case (4):
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &PING_256_MsgPkt);	
+        break;
+      case (5):
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &PING_512_MsgPkt);	
+        break;
+      case (6):
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &PING_1024_MsgPkt);	
+        break;
+      }	
 
       /* Pend on receipt of command packet -- timeout set to 500 millisecs */
       status = CFE_SB_RcvMsg(&PING_MsgPtr, PING_CommandPipe, 500);
       if (status == CFE_SUCCESS) {
 	PING_ProcessCommandPacket();
       }
-    } else {
-      printf("PING; %ld pings sent in 1 sec.\n", count);
+    } else if (packet_mode < 7) {
+      printf("PING; %ld pings mode %d sent in 1 sec.\n", count, packet_mode);
       count = 0;
+      run_count++;
+      if (run_count == 12) {
+        packet_mode++;
+        run_count = 0;
+        vTaskDelay(500);
+      }
       xTimerStart(timer_id, 0);
       timer_running = 1;
+    } else {
+      vTaskDelay(5000);
     }
   }
 
@@ -109,6 +173,13 @@ void PING_AppInit(void) {
   CFE_SB_Subscribe(PING_APP_CMD_MID, PING_CommandPipe);
   CFE_SB_Subscribe(PING_APP_SEND_HK_MID, PING_CommandPipe);
   CFE_SB_Subscribe(PONG_TO_PING_MID, PING_CommandPipe);
+ 
+  CFE_SB_Subscribe(PONG_TO_PING_32_MID,   PING_CommandPipe);
+  CFE_SB_Subscribe(PONG_TO_PING_64_MID,   PING_CommandPipe);
+  CFE_SB_Subscribe(PONG_TO_PING_128_MID,  PING_CommandPipe);
+  CFE_SB_Subscribe(PONG_TO_PING_256_MID,  PING_CommandPipe);
+  CFE_SB_Subscribe(PONG_TO_PING_512_MID,  PING_CommandPipe);
+  CFE_SB_Subscribe(PONG_TO_PING_1024_MID, PING_CommandPipe);
 
   PING_ResetCounters();
 
@@ -137,7 +208,27 @@ void PING_ProcessCommandPacket(void) {
     PING_ReportHousekeeping();
     break;
   case PONG_TO_PING_MID:
-    //printf("Circle complete.\n");
+    count++;
+    break;
+  case PONG_TO_PING_32_MID:
+    //;
+    //PP_32_Msg_t *temp = (PP_32_Msg_t *)CFE_SB_GetUserData(PING_MsgPtr);
+    //printf("PING: Message data: %d should = 2\n", temp->data[0]);
+    count++;
+    break;
+  case PONG_TO_PING_64_MID:
+    count++;
+    break;
+  case PONG_TO_PING_128_MID:
+    count++;
+    break;
+  case PONG_TO_PING_256_MID:
+    count++;
+    break;
+  case PONG_TO_PING_512_MID:
+    count++;
+    break;
+  case PONG_TO_PING_1024_MID:
     count++;
     break;
   default:

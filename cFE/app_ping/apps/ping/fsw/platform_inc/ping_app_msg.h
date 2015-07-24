@@ -26,8 +26,43 @@
 typedef struct
 {
    uint8    CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
 } PING_NoArgsCmd_t;
+
+typedef struct
+{
+  uint8 TlmHeader[CFE_SB_TLM_HDR_SIZE];
+  uint8 data[32];
+} OS_PACK PP_32_Msg_t;
+
+typedef struct
+{
+  uint8 TlmHeader[CFE_SB_TLM_HDR_SIZE];
+  uint8 data[64];
+} OS_PACK PP_64_Msg_t;
+
+typedef struct
+{
+  uint8 TlmHeader[CFE_SB_TLM_HDR_SIZE];
+  uint8 data[128];
+} OS_PACK PP_128_Msg_t;
+
+typedef struct
+{
+  uint8 TlmHeader[CFE_SB_TLM_HDR_SIZE];
+  uint8 data[256];
+} OS_PACK PP_256_Msg_t;
+
+typedef struct
+{
+  uint8 TlmHeader[CFE_SB_TLM_HDR_SIZE];
+  uint8 data[512];
+} OS_PACK PP_512_Msg_t;
+
+typedef struct
+{
+  uint8 TlmHeader[CFE_SB_TLM_HDR_SIZE];
+  uint8 data[1024];
+} OS_PACK PP_1024_Msg_t;
 
 /*************************************************************************/
 /*
