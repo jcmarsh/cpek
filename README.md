@@ -1,7 +1,11 @@
 # cpek
-CFE Performance Evaluation Kit
+cFE Performance Evaluation Kit
 
-Intended to evaluate NASA's cFE on a Gomspace Nanomind.
+Intended to evaluate NASA's cFE on a GomSpace NanoMind A712D.
+
+[NASA's cFS website](https://cfs.gsfc.nasa.gov/)
+
+[NASA's cFE website](http://opensource.gsfc.nasa.gov/projects/cfe/index.php)
 
 ## Benchmarks
 
