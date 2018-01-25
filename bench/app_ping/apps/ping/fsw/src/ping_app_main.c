@@ -19,10 +19,6 @@
 #include "pong_app_msgids.h"
 #include "pong_app_msg.h"
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/timers.h>
-#include <freertos/queue.h>
-
 /*
 ** global data
 */

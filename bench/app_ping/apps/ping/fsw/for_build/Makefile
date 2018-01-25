@@ -87,8 +87,6 @@ include $(CFE_PSP_SRC)/$(PSP)/make/compiler-opts.mak
 ## If this subsystem needs include files from another app, add the path here.
 ##
 INCLUDE_PATH = \
--I$(CFS_MISSION)/nanomind/build/include \
--I$(FREERTOS_SRC) \
 -I$(OSAL_SRC)/inc \
 -I$(CFE_CORE_SRC)/inc \
 -I$(CFE_PSP_SRC)/inc \
